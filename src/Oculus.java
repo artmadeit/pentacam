@@ -1,11 +1,18 @@
+import java.awt.Point;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import static java.util.stream.Collectors.toList;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -18,14 +25,18 @@ import javax.swing.table.DefaultTableModel;
  */
 public class Oculus extends javax.swing.JFrame {
 
+    List<Exam> fakeExams = Arrays.asList(
+            new Exam(1, LocalDate.of(2016, 8, 12), LocalTime.of(12, 15), "Derecha"),
+            new Exam(2, LocalDate.of(2016, 10, 8), LocalTime.of(10, 20), "Derecha"),
+            new Exam(3, LocalDate.of(2016, 10, 8), LocalTime.of(10, 35), "Izquierdo")
+    );
+
     List<Patient> patients = Arrays.asList(
-            new Patient("Arthur", "Mauricio Delgadillo", LocalDate.of(1995, 11, 04), Arrays.asList(
-                            new Exam(1, LocalDate.of(2016, 8, 12), LocalTime.of(12, 15), "Derecha"),
-                            new Exam(2, LocalDate.of(2016, 10, 8), LocalTime.of(10, 20), "Derecha"),
-                            new Exam(3, LocalDate.of(2016, 10, 8), LocalTime.of(10, 35), "Izquierdo")
-                    )
-            ),
-            new Patient("Diana", "Quintanilla Perez", LocalDate.of(1994, 06, 05), Collections.EMPTY_LIST)
+            new Patient("Arthur", "Mauricio Delgadillo", LocalDate.of(1995, 11, 04), fakeExams),
+            new Patient("Diana", "Quintanilla Perez", LocalDate.of(1994, 06, 05),
+                    Arrays.asList(new Exam(1, LocalDate.of(2018, 9, 3), LocalTime.of(11, 20), "Derecha"))),
+            new Patient("Alex", "Quintanilla Perez", LocalDate.of(1991, 10, 12), Collections.EMPTY_LIST),
+            new Patient("Paul", "McCartney", LocalDate.of(1948, 02, 20), fakeExams)
     );
 
     /**
@@ -37,8 +48,16 @@ public class Oculus extends javax.swing.JFrame {
         updatePatientsTable(patients);
     }
 
+    public class NonEditableTableModel extends DefaultTableModel {
+
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    }
+
     private void updatePatientsTable(List<Patient> patients) {
-        DefaultTableModel tableModel = new DefaultTableModel(0, 0);
+        NonEditableTableModel tableModel = new NonEditableTableModel();
         tableModel.setColumnIdentifiers(new String[]{"Apellido", "Nombre", "Fecha de nacimiento",
             "ID"});
 
@@ -55,7 +74,7 @@ public class Oculus extends javax.swing.JFrame {
     }
 
     private void updateExamsTable(List<Exam> exams) {
-        DefaultTableModel tableModel = new DefaultTableModel(0, 0);
+        NonEditableTableModel tableModel = new NonEditableTableModel();
         tableModel.setColumnIdentifiers(new String[]{"#", "Fecha", "Hora",
             "Dispositivo", "Ojo", "Tipo de examen", "Texto de informacion"});
 
@@ -65,6 +84,7 @@ public class Oculus extends javax.swing.JFrame {
         });
 
         examsTable.setModel(tableModel);
+        examsTable.setEnabled(false);
     }
 
     /**
@@ -82,7 +102,7 @@ public class Oculus extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         lastNameTextField = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
+        firstNameTextField = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jTextField3 = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
@@ -91,7 +111,7 @@ public class Oculus extends javax.swing.JFrame {
         jTextField5 = new javax.swing.JTextField();
         jPanel5 = new javax.swing.JPanel();
         saveButtton = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
+        cancelButton = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jPanel8 = new javax.swing.JPanel();
@@ -129,7 +149,13 @@ public class Oculus extends javax.swing.JFrame {
 
         jLabel2.setText("Nombre");
         jPanel6.add(jLabel2);
-        jPanel6.add(jTextField2);
+
+        firstNameTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                firstNameTextFieldKeyPressed(evt);
+            }
+        });
+        jPanel6.add(firstNameTextField);
 
         jLabel3.setText("Fecha Nac.:");
         jPanel6.add(jLabel3);
@@ -155,8 +181,13 @@ public class Oculus extends javax.swing.JFrame {
         });
         jPanel5.add(saveButtton);
 
-        jButton1.setText("Cancelar");
-        jPanel5.add(jButton1);
+        cancelButton.setText("Cancelar");
+        cancelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelButtonActionPerformed(evt);
+            }
+        });
+        jPanel5.add(cancelButton);
 
         jPanel4.add(jPanel5);
 
@@ -243,7 +274,11 @@ public class Oculus extends javax.swing.JFrame {
     }
 
     private boolean isSimilar(Patient x) {
-        return x.lastName.toLowerCase().contains(lastNameTextField.getText().toLowerCase());
+        return isSimilar(x.lastName, lastNameTextField.getText()) && isSimilar(x.firstName, firstNameTextField.getText());
+    }
+
+    private boolean isSimilar(String text, String otherText) {
+        return text.toLowerCase().contains(otherText.toLowerCase());
     }
 
 
@@ -252,6 +287,30 @@ public class Oculus extends javax.swing.JFrame {
             search();
         }
     }//GEN-LAST:event_lastNameTextFieldKeyPressed
+
+    private void firstNameTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_firstNameTextFieldKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            search();
+        }
+    }//GEN-LAST:event_firstNameTextFieldKeyPressed
+
+    private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
+        updatePatientsTable(patients);
+        examsTable.setEnabled(true);
+        examsTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent mouseEvent) {
+                // JTable table =(JTable) mouseEvent.getSource();
+                Point point = mouseEvent.getPoint();
+                int row = examsTable.rowAtPoint(point);
+                if (mouseEvent.getClickCount() == 2 && examsTable.getSelectedRow() != -1) {
+                    // your valueChanged overridden method 
+                    new ExamTopographyUI().setVisible(true);
+                    // System.out.println(row);
+                }
+            }
+        });
+    }//GEN-LAST:event_cancelButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -289,8 +348,9 @@ public class Oculus extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton cancelButton;
     private javax.swing.JTable examsTable;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JTextField firstNameTextField;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -308,7 +368,6 @@ public class Oculus extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
     private javax.swing.JTextField jTextField4;
     private javax.swing.JTextField jTextField5;
