@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import static java.util.stream.Collectors.toList;
+import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
@@ -46,6 +47,21 @@ public class Oculus extends javax.swing.JFrame {
         initComponents();
 
         updatePatientsTable(patients);
+        
+        examsTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent mouseEvent) {
+                JTable table = (JTable) mouseEvent.getSource();
+                Point point = mouseEvent.getPoint();
+                int row = table.rowAtPoint(point);
+                if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
+                    // your valueChanged overridden method 
+                    examTopography = new ExamTopographyUI();
+                    examTopography.setVisible(true);
+    
+                }
+            }
+        });
     }
 
     public class NonEditableTableModel extends DefaultTableModel {
@@ -294,22 +310,12 @@ public class Oculus extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_firstNameTextFieldKeyPressed
 
+    ExamTopographyUI examTopography;
+                    
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         updatePatientsTable(patients);
         examsTable.setEnabled(true);
-        examsTable.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent mouseEvent) {
-                // JTable table =(JTable) mouseEvent.getSource();
-                Point point = mouseEvent.getPoint();
-                int row = examsTable.rowAtPoint(point);
-                if (mouseEvent.getClickCount() == 2 && examsTable.getSelectedRow() != -1) {
-                    // your valueChanged overridden method 
-                    new ExamTopographyUI().setVisible(true);
-                    // System.out.println(row);
-                }
-            }
-        });
+        
     }//GEN-LAST:event_cancelButtonActionPerformed
 
     /**
