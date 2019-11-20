@@ -1,12 +1,18 @@
+import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static java.util.stream.Collectors.toList;
 import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
@@ -24,7 +30,7 @@ import javax.swing.table.TableModel;
  *
  * @author Usuario
  */
-public class Oculus extends javax.swing.JFrame {
+public class Oculus extends javax.swing.JFrame implements Delay {
 
     List<Exam> fakeExams = Arrays.asList(
             new Exam(1, LocalDate.of(2016, 8, 12), LocalTime.of(12, 15), "Derecha"),
@@ -47,7 +53,7 @@ public class Oculus extends javax.swing.JFrame {
         initComponents();
 
         updatePatientsTable(patients);
-        
+
         examsTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent mouseEvent) {
@@ -55,11 +61,30 @@ public class Oculus extends javax.swing.JFrame {
                 Point point = mouseEvent.getPoint();
                 int row = table.rowAtPoint(point);
                 if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
-                    // your valueChanged overridden method 
+                    onDoubleClickRow();
+                }
+            }
+
+            private void onDoubleClickRow() {
+
+                try {
+                    delay();
                     examTopography = new ExamTopographyUI();
                     examTopography.setVisible(true);
-    
+                    examTopography.addWindowListener(new WindowAdapter() {
+                        @Override
+                        public void windowOpened(WindowEvent we) {
+                            try {
+                                examTopography.delay(4);
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(Oculus.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    });
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Oculus.class.getName()).log(Level.SEVERE, null, ex);
                 }
+
             }
         });
     }
@@ -311,11 +336,11 @@ public class Oculus extends javax.swing.JFrame {
     }//GEN-LAST:event_firstNameTextFieldKeyPressed
 
     ExamTopographyUI examTopography;
-                    
+
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         updatePatientsTable(patients);
         examsTable.setEnabled(true);
-        
+
     }//GEN-LAST:event_cancelButtonActionPerformed
 
     /**

@@ -7,7 +7,7 @@
  *
  * @author Usuario
  */
-public class ExamTopographyUI extends javax.swing.JFrame {
+public class ExamTopographyUI extends javax.swing.JFrame implements Delay{
 
     /**
      * Creates new form ExamTopographyUI
