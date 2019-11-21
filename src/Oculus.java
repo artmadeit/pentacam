@@ -56,7 +56,6 @@ public class Oculus extends javax.swing.JFrame implements Delay {
             new Patient("Paul", "McCartney", LocalDate.of(1948, 02, 20), fakeExams)
     );
 
-    private int selectedPatientIndex = 0;
     private List<Patient> selectedPatients = patients;
 
     /**
@@ -113,8 +112,12 @@ public class Oculus extends javax.swing.JFrame implements Delay {
             return false;
         }
     }
-
+    
     private void updatePatientsTable() {
+        updatePatientsTable(0);
+    }
+
+    private void updatePatientsTable(int row) {
         NonEditableTableModel tableModel = new NonEditableTableModel();
         tableModel.setColumnIdentifiers(new String[]{"Apellido", "Nombre", "Fecha de nacimiento",
             "ID"});
@@ -127,7 +130,7 @@ public class Oculus extends javax.swing.JFrame implements Delay {
         patientsTable.setModel(tableModel);
 
         if (!selectedPatients.isEmpty()) {
-            patientsTable.setRowSelectionInterval(selectedPatientIndex, selectedPatientIndex);
+            patientsTable.setRowSelectionInterval(row, row);
         }
     }
 
@@ -333,7 +336,6 @@ public class Oculus extends javax.swing.JFrame implements Delay {
         selectedPatients = selectedPatient.isPresent() ? Arrays.asList(selectedPatient.get())
                 : patients.stream().filter(x -> isSimilar(x)).collect(toList());
 
-        selectedPatientIndex = 0;
         updatePatientsTable();
 
         List<Exam> exams = selectedPatients.isEmpty() ? EMPTY_LIST : selectedPatients.get(0).exams;
@@ -368,14 +370,11 @@ public class Oculus extends javax.swing.JFrame implements Delay {
     ExamTopographyUI examTopography;
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
-        selectedPatient = Optional.of(selectedPatients.get(0));
-        selectedPatientIndex = patients.indexOf(selectedPatient.get());
+        selectPatient(selectedPatients.get(0));
+        int row = patients.indexOf(selectedPatient.get());
         selectedPatients = patients;
-        
-        firstNameTextField.setText(selectedPatient.get().firstName);
-        lastNameTextField.setText(selectedPatient.get().lastName);
-
-        updatePatientsTable();
+                
+        updatePatientsTable(row);
         examsTable.setEnabled(true);
     }//GEN-LAST:event_cancelButtonActionPerformed
 
@@ -387,8 +386,7 @@ public class Oculus extends javax.swing.JFrame implements Delay {
                 return;
             }
 
-            selectPatient(row);
-            updateExamsTable(selectedPatient.get().exams);
+            selectPatient(row);   
         }
 
         if (evt.getKeyCode() == KeyEvent.VK_UP) {
@@ -398,18 +396,20 @@ public class Oculus extends javax.swing.JFrame implements Delay {
             }
 
             selectPatient(row);
-            updateExamsTable(selectedPatient.get().exams);
         }
     }//GEN-LAST:event_patientsTableKeyPressed
 
     private Optional<Patient> selectedPatient = Optional.empty();
 
     private void selectPatient(int index) {
-        selectedPatientIndex = index;
-        selectedPatient = Optional.of(selectedPatients.get(selectedPatientIndex));
+        selectPatient(selectedPatients.get(index));
+        updateExamsTable(selectedPatient.get().exams);
+    }
 
-        firstNameTextField.setText(selectedPatient.get().firstName);
-        lastNameTextField.setText(selectedPatient.get().lastName);
+    private void selectPatient(Patient arg) {
+        selectedPatient = Optional.of(arg);
+        firstNameTextField.setText(arg.firstName);
+        lastNameTextField.setText(arg.lastName);
     }
 
     /**
