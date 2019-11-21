@@ -8,14 +8,14 @@
  * @author Usuario
  */
 public class ExamTopographyUI extends javax.swing.JFrame implements Delay{
-
+    
     /**
      * Creates new form ExamTopographyUI
      */
     public ExamTopographyUI() {
         initComponents();
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -41,6 +41,7 @@ public class ExamTopographyUI extends javax.swing.JFrame implements Delay{
         jMenuItem8 = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
 
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("OCULUS - Pentacam Vista preliminar");
 
         jPanel1.setLayout(new java.awt.BorderLayout());

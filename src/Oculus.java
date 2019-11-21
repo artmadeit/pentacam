@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.stream.Collectors.toList;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
@@ -54,6 +55,7 @@ public class Oculus extends javax.swing.JFrame implements Delay {
 
         updatePatientsTable(patients);
 
+        Oculus frame = this;
         examsTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent mouseEvent) {
@@ -80,13 +82,33 @@ public class Oculus extends javax.swing.JFrame implements Delay {
                                 Logger.getLogger(Oculus.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }
+
+                        @Override
+                        public void windowClosed(WindowEvent e) {
+                            System.out.println("window closed");
+                            frame.refresh();
+                        }
+
                     });
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(Oculus.class.getName()).log(Level.SEVERE, null, ex);
+                    System.out.println("akkaka" + ex.getMessage());
                 }
 
             }
         });
+    }
+
+    public void refresh() {
+        try {
+
+            System.out.println("refreshed");
+            delay();
+            SwingUtilities.updateComponentTreeUI(this);
+            delay();
+        } catch (InterruptedException ex) {
+            System.out.println(ex.getMessage());
+        }
+
     }
 
     public class NonEditableTableModel extends DefaultTableModel {
