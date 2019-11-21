@@ -24,6 +24,6 @@ class Patient {
         this.birthDate = birthDate;
         this.exams = exams;
     }
-    
+
     
 }

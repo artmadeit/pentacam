@@ -9,9 +9,14 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import static java.util.Collections.EMPTY_LIST;
 import java.util.List;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static java.util.stream.Collectors.toList;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.table.DefaultTableModel;
 
 /*
@@ -51,7 +56,7 @@ public class Oculus extends javax.swing.JFrame implements Delay {
             new Patient("Paul", "McCartney", LocalDate.of(1948, 02, 20), fakeExams)
     );
 
-    private int selectedPatient = 0;
+    private int selectedPatientIndex = 0;
     private List<Patient> selectedPatients = patients;
 
     /**
@@ -122,7 +127,7 @@ public class Oculus extends javax.swing.JFrame implements Delay {
         patientsTable.setModel(tableModel);
 
         if (!selectedPatients.isEmpty()) {
-            patientsTable.setRowSelectionInterval(selectedPatient, selectedPatient);
+            patientsTable.setRowSelectionInterval(selectedPatientIndex, selectedPatientIndex);
         }
     }
 
@@ -276,6 +281,7 @@ public class Oculus extends javax.swing.JFrame implements Delay {
 
             }
         ));
+        patientsTable.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         patientsTable.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 patientsTableKeyPressed(evt);
@@ -324,8 +330,10 @@ public class Oculus extends javax.swing.JFrame implements Delay {
     }//GEN-LAST:event_saveButttonActionPerformed
 
     private void search() {
-        selectedPatients = patients.stream().filter(x -> isSimilar(x)).collect(toList());
-        selectedPatient = 0;
+        selectedPatients = selectedPatient.isPresent() ? Arrays.asList(selectedPatient.get())
+                : patients.stream().filter(x -> isSimilar(x)).collect(toList());
+
+        selectedPatientIndex = 0;
         updatePatientsTable();
 
         List<Exam> exams = selectedPatients.isEmpty() ? EMPTY_LIST : selectedPatients.get(0).exams;
@@ -344,20 +352,28 @@ public class Oculus extends javax.swing.JFrame implements Delay {
     private void lastNameTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_lastNameTextFieldKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             search();
+        } else {
+            selectedPatient = Optional.empty();
         }
     }//GEN-LAST:event_lastNameTextFieldKeyPressed
 
     private void firstNameTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_firstNameTextFieldKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             search();
+        } else {
+            selectedPatient = Optional.empty();
         }
     }//GEN-LAST:event_firstNameTextFieldKeyPressed
 
     ExamTopographyUI examTopography;
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
-        selectPatient(patients.indexOf(selectedPatients.get(0)));
+        selectedPatient = Optional.of(selectedPatients.get(0));
+        selectedPatientIndex = patients.indexOf(selectedPatient.get());
         selectedPatients = patients;
+        
+        firstNameTextField.setText(selectedPatient.get().firstName);
+        lastNameTextField.setText(selectedPatient.get().lastName);
 
         updatePatientsTable();
         examsTable.setEnabled(true);
@@ -367,35 +383,33 @@ public class Oculus extends javax.swing.JFrame implements Delay {
     private void patientsTableKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_patientsTableKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_DOWN) {
             int row = patientsTable.getSelectedRow() + 1;
-            if(row >= selectedPatients.size()) {
+            if (row >= selectedPatients.size()) {
                 return;
             }
-            
+
             selectPatient(row);
-            showExams();
+            updateExamsTable(selectedPatient.get().exams);
         }
 
         if (evt.getKeyCode() == KeyEvent.VK_UP) {
             int row = patientsTable.getSelectedRow() - 1;
-            if(row < 0) {
+            if (row < 0) {
                 return;
             }
-            
+
             selectPatient(row);
-            showExams();
+            updateExamsTable(selectedPatient.get().exams);
         }
     }//GEN-LAST:event_patientsTableKeyPressed
 
+    private Optional<Patient> selectedPatient = Optional.empty();
+
     private void selectPatient(int index) {
-        selectedPatient = index;
+        selectedPatientIndex = index;
+        selectedPatient = Optional.of(selectedPatients.get(selectedPatientIndex));
 
-        firstNameTextField.setText(patients.get(selectedPatient).firstName);
-        lastNameTextField.setText(patients.get(selectedPatient).lastName);
-    }
-
-    private void showExams() {
-        Patient patient = selectedPatients.get(selectedPatient);
-        updateExamsTable(patient.exams);
+        firstNameTextField.setText(selectedPatient.get().firstName);
+        lastNameTextField.setText(selectedPatient.get().lastName);
     }
 
     /**
@@ -423,8 +437,13 @@ public class Oculus extends javax.swing.JFrame implements Delay {
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(Oculus.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
 
+        //</editor-fold>
+//        try {
+//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+//            Logger.getLogger(Oculus.class.getName()).log(Level.SEVERE, null, ex);
+//        }
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
             new Oculus().setVisible(true);
