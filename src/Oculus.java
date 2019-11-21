@@ -40,7 +40,7 @@ public class Oculus extends javax.swing.JFrame implements Delay {
             new Exam(1, LocalDate.of(2016, 8, 12), LocalTime.of(12, 15), Eye.D),
             new Exam(2, LocalDate.of(2016, 10, 8), LocalTime.of(10, 20), Eye.D),
             new Exam(3, LocalDate.of(2016, 10, 8), LocalTime.of(10, 35), Eye.I, "Corvis"),
-            new Exam(3, LocalDate.of(2016, 10, 8), LocalTime.of(10, 40), Eye.I)
+            new Exam(4, LocalDate.of(2016, 10, 8), LocalTime.of(10, 40), Eye.I)
     );
 
     List<Patient> patients = Arrays.asList(
@@ -56,7 +56,8 @@ public class Oculus extends javax.swing.JFrame implements Delay {
             new Patient("Paul", "McCartney", LocalDate.of(1948, 02, 20), fakeExams)
     );
 
-    private List<Patient> selectedPatients = patients;
+    List<Patient> selectedPatients = patients;
+    ExamTopographyUI examTopography;
 
     /**
      * Creates new form Oculus
@@ -112,7 +113,7 @@ public class Oculus extends javax.swing.JFrame implements Delay {
             return false;
         }
     }
-    
+
     private void updatePatientsTable() {
         updatePatientsTable(0);
     }
@@ -352,28 +353,26 @@ public class Oculus extends javax.swing.JFrame implements Delay {
 
 
     private void lastNameTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_lastNameTextFieldKeyPressed
-        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            search();
-        } else {
-            selectedPatient = Optional.empty();
-        }
+        searchOnEnter(evt);
     }//GEN-LAST:event_lastNameTextFieldKeyPressed
 
     private void firstNameTextFieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_firstNameTextFieldKeyPressed
+        searchOnEnter(evt);
+    }//GEN-LAST:event_firstNameTextFieldKeyPressed
+
+    private void searchOnEnter(KeyEvent evt) {
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             search();
         } else {
             selectedPatient = Optional.empty();
         }
-    }//GEN-LAST:event_firstNameTextFieldKeyPressed
-
-    ExamTopographyUI examTopography;
+    }
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         selectPatient(selectedPatients.get(0));
         int row = patients.indexOf(selectedPatient.get());
         selectedPatients = patients;
-                
+
         updatePatientsTable(row);
         examsTable.setEnabled(true);
     }//GEN-LAST:event_cancelButtonActionPerformed
@@ -386,7 +385,7 @@ public class Oculus extends javax.swing.JFrame implements Delay {
                 return;
             }
 
-            selectPatient(row);   
+            selectPatient(row);
         }
 
         if (evt.getKeyCode() == KeyEvent.VK_UP) {
