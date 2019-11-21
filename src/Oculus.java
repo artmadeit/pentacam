@@ -9,8 +9,6 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import static java.util.Collections.EMPTY_LIST;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import static java.util.stream.Collectors.toList;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
@@ -52,13 +50,16 @@ public class Oculus extends javax.swing.JFrame implements Delay {
             new Patient("Paul", "McCartney", LocalDate.of(1948, 02, 20), fakeExams)
     );
 
+    private int selectedPatient = 0;
+    private List<Patient> selectedPatients = patients;
+
     /**
      * Creates new form Oculus
      */
     public Oculus() {
         initComponents();
 
-        updatePatientsTable(patients);
+        updatePatientsTable();
 
         Oculus frame = this;
         examsTable.addMouseListener(new MouseAdapter() {
@@ -107,20 +108,20 @@ public class Oculus extends javax.swing.JFrame implements Delay {
         }
     }
 
-    private void updatePatientsTable(List<Patient> patients) {
+    private void updatePatientsTable() {
         NonEditableTableModel tableModel = new NonEditableTableModel();
         tableModel.setColumnIdentifiers(new String[]{"Apellido", "Nombre", "Fecha de nacimiento",
             "ID"});
 
-        patients.stream().forEach(p -> {
+        selectedPatients.stream().forEach(p -> {
             tableModel.addRow(new Object[]{p.lastName, p.firstName, p.birthDate.toString(),
                 "asdasd"});
         });
 
         patientsTable.setModel(tableModel);
 
-        if (!patients.isEmpty()) {
-            patientsTable.setRowSelectionInterval(0, 0);
+        if (!selectedPatients.isEmpty()) {
+            patientsTable.setRowSelectionInterval(selectedPatient, selectedPatient);
         }
     }
 
@@ -322,10 +323,11 @@ public class Oculus extends javax.swing.JFrame implements Delay {
     }//GEN-LAST:event_saveButttonActionPerformed
 
     private void search() {
-        List<Patient> filteredPatients = patients.stream().filter(x -> isSimilar(x)).collect(toList());
-        updatePatientsTable(filteredPatients);
+        selectedPatients = patients.stream().filter(x -> isSimilar(x)).collect(toList());
+        selectedPatient = 0;
+        updatePatientsTable();
 
-        List<Exam> exams = filteredPatients.isEmpty() ? EMPTY_LIST : filteredPatients.get(0).exams;
+        List<Exam> exams = selectedPatients.isEmpty() ? EMPTY_LIST : selectedPatients.get(0).exams;
         updateExamsTable(exams);
     }
 
@@ -353,26 +355,31 @@ public class Oculus extends javax.swing.JFrame implements Delay {
     ExamTopographyUI examTopography;
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
-        updatePatientsTable(patients);
+        selectedPatient = patients.indexOf(selectedPatients.get(0));
+        selectedPatients = patients;
+        
+        updatePatientsTable();
         examsTable.setEnabled(true);
     }//GEN-LAST:event_cancelButtonActionPerformed
 
     private void patientsTableKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_patientsTableKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_DOWN) {
-            showExams(patientsTable.getSelectedRow() + 1);
+            selectedPatient = patientsTable.getSelectedRow() + 1;
+            showExams();
         }
 
         if (evt.getKeyCode() == KeyEvent.VK_UP) {
-            showExams(patientsTable.getSelectedRow() - 1);
+            selectedPatient = patientsTable.getSelectedRow() - 1;
+            showExams();
         }
     }//GEN-LAST:event_patientsTableKeyPressed
 
-    private void showExams(int row) {
-        if (row < 0 || row >= patients.size()) {
+    private void showExams() {
+        if (selectedPatient < 0 || selectedPatient >= selectedPatients.size()) {
             return;
         }
 
-        Patient patient = patients.get(row);
+        Patient patient = selectedPatients.get(selectedPatient);
         updateExamsTable(patient.exams);
     }
 
