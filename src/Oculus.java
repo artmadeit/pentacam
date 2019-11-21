@@ -28,8 +28,9 @@ import javax.swing.table.DefaultTableModel;
 public class Oculus extends javax.swing.JFrame implements Delay {
 
     class Eye {
+
         public static final String I = "Izquierdo";
-        public static final String D = "Derecho"; 
+        public static final String D = "Derecho";
     }
 
     List<Exam> fakeExams = Arrays.asList(
@@ -290,6 +291,11 @@ public class Oculus extends javax.swing.JFrame implements Delay {
 
             }
         ));
+        patientsTable.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                patientsTableKeyPressed(evt);
+            }
+        });
         jScrollPane1.setViewportView(patientsTable);
         patientsTable.getColumnModel().getSelectionModel().setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
@@ -366,8 +372,26 @@ public class Oculus extends javax.swing.JFrame implements Delay {
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         updatePatientsTable(patients);
         examsTable.setEnabled(true);
-
     }//GEN-LAST:event_cancelButtonActionPerformed
+
+    private void patientsTableKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_patientsTableKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_DOWN) {
+            showExams(patientsTable.getSelectedRow() + 1);
+        }
+
+        if (evt.getKeyCode() == KeyEvent.VK_UP) {
+            showExams(patientsTable.getSelectedRow() - 1);
+        }
+    }//GEN-LAST:event_patientsTableKeyPressed
+
+    private void showExams(int row) {
+        if (row < 0 || row >= patients.size()) {
+            return;
+        }
+
+        Patient patient = patients.get(row);
+        updateExamsTable(patient.exams);
+    }
 
     /**
      * @param args the command line arguments
@@ -397,10 +421,8 @@ public class Oculus extends javax.swing.JFrame implements Delay {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Oculus().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new Oculus().setVisible(true);
         });
     }
 
