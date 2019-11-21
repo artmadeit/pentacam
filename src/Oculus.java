@@ -34,7 +34,8 @@ public class Oculus extends javax.swing.JFrame implements Delay {
     List<Exam> fakeExams = Arrays.asList(
             new Exam(1, LocalDate.of(2016, 8, 12), LocalTime.of(12, 15), Eye.D),
             new Exam(2, LocalDate.of(2016, 10, 8), LocalTime.of(10, 20), Eye.D),
-            new Exam(3, LocalDate.of(2016, 10, 8), LocalTime.of(10, 35), Eye.I)
+            new Exam(3, LocalDate.of(2016, 10, 8), LocalTime.of(10, 35), Eye.I, "Corvis"),
+            new Exam(3, LocalDate.of(2016, 10, 8), LocalTime.of(10, 40), Eye.I)
     );
 
     List<Patient> patients = Arrays.asList(
@@ -131,7 +132,7 @@ public class Oculus extends javax.swing.JFrame implements Delay {
             "Dispositivo", "Ojo", "Tipo de examen", "Texto de informacion"});
 
         exams.stream().forEach(x -> {
-            tableModel.addRow(new Object[]{x.number, x.date, x.time, "Pentacam", "(25) 3D-Scan HR", x.eye,
+            tableModel.addRow(new Object[]{x.number, x.date, x.time, x.device, "(25) 3D-Scan HR", x.eye,
                 "asdasd"});
         });
 
@@ -357,35 +358,42 @@ public class Oculus extends javax.swing.JFrame implements Delay {
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         selectPatient(patients.indexOf(selectedPatients.get(0)));
         selectedPatients = patients;
-        
+
         updatePatientsTable();
         examsTable.setEnabled(true);
     }//GEN-LAST:event_cancelButtonActionPerformed
 
-    void selectPatient(int index) {
-        selectedPatient = index;
-        
-        firstNameTextField.setText(patients.get(selectedPatient).firstName);
-        lastNameTextField.setText(patients.get(selectedPatient).lastName);
-    }
-    
+
     private void patientsTableKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_patientsTableKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_DOWN) {
-            selectPatient(patientsTable.getSelectedRow() + 1);
+            int row = patientsTable.getSelectedRow() + 1;
+            if(row >= selectedPatients.size()) {
+                return;
+            }
+            
+            selectPatient(row);
             showExams();
         }
 
         if (evt.getKeyCode() == KeyEvent.VK_UP) {
-            selectPatient(patientsTable.getSelectedRow() - 1);
+            int row = patientsTable.getSelectedRow() - 1;
+            if(row < 0) {
+                return;
+            }
+            
+            selectPatient(row);
             showExams();
         }
     }//GEN-LAST:event_patientsTableKeyPressed
 
-    private void showExams() {
-        if (selectedPatient < 0 || selectedPatient >= selectedPatients.size()) {
-            return;
-        }
+    private void selectPatient(int index) {
+        selectedPatient = index;
 
+        firstNameTextField.setText(patients.get(selectedPatient).firstName);
+        lastNameTextField.setText(patients.get(selectedPatient).lastName);
+    }
+
+    private void showExams() {
         Patient patient = selectedPatients.get(selectedPatient);
         updateExamsTable(patient.exams);
     }
