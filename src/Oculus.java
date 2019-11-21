@@ -355,21 +355,28 @@ public class Oculus extends javax.swing.JFrame implements Delay {
     ExamTopographyUI examTopography;
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
-        selectedPatient = patients.indexOf(selectedPatients.get(0));
+        selectPatient(patients.indexOf(selectedPatients.get(0)));
         selectedPatients = patients;
         
         updatePatientsTable();
         examsTable.setEnabled(true);
     }//GEN-LAST:event_cancelButtonActionPerformed
 
+    void selectPatient(int index) {
+        selectedPatient = index;
+        
+        firstNameTextField.setText(patients.get(selectedPatient).firstName);
+        lastNameTextField.setText(patients.get(selectedPatient).lastName);
+    }
+    
     private void patientsTableKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_patientsTableKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_DOWN) {
-            selectedPatient = patientsTable.getSelectedRow() + 1;
+            selectPatient(patientsTable.getSelectedRow() + 1);
             showExams();
         }
 
         if (evt.getKeyCode() == KeyEvent.VK_UP) {
-            selectedPatient = patientsTable.getSelectedRow() - 1;
+            selectPatient(patientsTable.getSelectedRow() - 1);
             showExams();
         }
     }//GEN-LAST:event_patientsTableKeyPressed
