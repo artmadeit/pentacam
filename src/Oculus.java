@@ -73,46 +73,29 @@ public class Oculus extends javax.swing.JFrame implements Delay {
             }
 
             private void onDoubleClickRow() {
+                delay();
+                examTopography = new ExamTopographyUI();
+                examTopography.setVisible(true);
+                examTopography.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowOpened(WindowEvent we) {
+                        examTopography.delay(4);
+                    }
 
-                try {
-                    delay();
-                    examTopography = new ExamTopographyUI();
-                    examTopography.setVisible(true);
-                    examTopography.addWindowListener(new WindowAdapter() {
-                        @Override
-                        public void windowOpened(WindowEvent we) {
-                            try {
-                                examTopography.delay(4);
-                            } catch (InterruptedException ex) {
-                                Logger.getLogger(Oculus.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
-
-                        @Override
-                        public void windowClosed(WindowEvent e) {
-                            System.out.println("window closed");
-                            frame.refresh();
-                        }
-
-                    });
-                } catch (InterruptedException ex) {
-                    System.out.println("akkaka" + ex.getMessage());
-                }
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        frame.refresh();
+                    }
+                });
 
             }
         });
     }
 
     public void refresh() {
-        try {
-
-            System.out.println("refreshed");
-            delay();
-            SwingUtilities.updateComponentTreeUI(this);
-            delay();
-        } catch (InterruptedException ex) {
-            System.out.println(ex.getMessage());
-        }
+        delay();
+        SwingUtilities.updateComponentTreeUI(this);
+        delay();
 
     }
 
