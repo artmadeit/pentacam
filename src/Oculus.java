@@ -1,4 +1,3 @@
-import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -8,19 +7,14 @@ import java.awt.event.WindowEvent;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Arrays;
-import java.util.Collections;
+import static java.util.Collections.EMPTY_LIST;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.stream.Collectors.toList;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -33,17 +27,27 @@ import javax.swing.table.TableModel;
  */
 public class Oculus extends javax.swing.JFrame implements Delay {
 
+    class Eye {
+        public static final String I = "Izquierdo";
+        public static final String D = "Derecho"; 
+    }
+
     List<Exam> fakeExams = Arrays.asList(
-            new Exam(1, LocalDate.of(2016, 8, 12), LocalTime.of(12, 15), "Derecha"),
-            new Exam(2, LocalDate.of(2016, 10, 8), LocalTime.of(10, 20), "Derecha"),
-            new Exam(3, LocalDate.of(2016, 10, 8), LocalTime.of(10, 35), "Izquierdo")
+            new Exam(1, LocalDate.of(2016, 8, 12), LocalTime.of(12, 15), Eye.D),
+            new Exam(2, LocalDate.of(2016, 10, 8), LocalTime.of(10, 20), Eye.D),
+            new Exam(3, LocalDate.of(2016, 10, 8), LocalTime.of(10, 35), Eye.I)
     );
 
     List<Patient> patients = Arrays.asList(
             new Patient("Arthur", "Mauricio Delgadillo", LocalDate.of(1995, 11, 04), fakeExams),
             new Patient("Diana", "Quintanilla Perez", LocalDate.of(1994, 06, 05),
-                    Arrays.asList(new Exam(1, LocalDate.of(2018, 9, 3), LocalTime.of(11, 20), "Derecha"))),
-            new Patient("Alex", "Quintanilla Perez", LocalDate.of(1991, 10, 12), Collections.EMPTY_LIST),
+                    Arrays.asList(new Exam(1, LocalDate.of(2018, 9, 3), LocalTime.of(11, 20), Eye.D))),
+            new Patient("DIANA", "QUINTANILLA PEREZ", LocalDate.of(1994, 06, 05),
+                    Arrays.asList(
+                            new Exam(1, LocalDate.of(2019, 3, 4), LocalTime.of(12, 30), Eye.D),
+                            new Exam(2, LocalDate.of(2019, 3, 4), LocalTime.of(12, 35), Eye.I))
+            ),
+            new Patient("Alex", "Quintanilla Perez", LocalDate.of(1991, 10, 12), EMPTY_LIST),
             new Patient("Paul", "McCartney", LocalDate.of(1948, 02, 20), fakeExams)
     );
 
@@ -332,7 +336,7 @@ public class Oculus extends javax.swing.JFrame implements Delay {
         List<Patient> filteredPatients = patients.stream().filter(x -> isSimilar(x)).collect(toList());
         updatePatientsTable(filteredPatients);
 
-        List<Exam> exams = filteredPatients.isEmpty() ? Collections.EMPTY_LIST : filteredPatients.get(0).exams;
+        List<Exam> exams = filteredPatients.isEmpty() ? EMPTY_LIST : filteredPatients.get(0).exams;
         updateExamsTable(exams);
     }
 
